@@ -1,0 +1,17 @@
+As a measure of similarity, I think cosine similarity might be the most appropriate measurement. I plan to use text embeddings which Jaccard similarity does not work with. Between cosine similarity and Euclidean distance, its important to consider whether the feature vectors are similar in length.
+
+"As far as cosine and Euclidean metrics are concerned, the differentiating factor between the two is that cosine similarity is not affected by the magnitude/length of the feature vectors. Let’s say we are creating a topic tagging algorithm. If a word (e.g. senate) occurs more frequently in document 1 than it does in document 2,  we could assume that document 1 is more related to the topic of Politics. However, it could also be the case that we are working with news articles of different lengths. Then, the word ‘senate’ probably occurred more in document 1 simply because it was way longer. As we saw earlier when the word ‘empty’ was repeated, cosine similarity is less sensitive to a difference in lengths."
+from https://www.newscatcherapi.com/blog/ultimate-guide-to-text-similarity-with-python
+
+For my embeddings, it would be best to use a pre-trained model from hugging face. I will be using Sentence Transformers (a.k.a. SBERT). This will allow for efficient conversion of sentences into vectors. This is the model I used. 
+https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+
+Researching further, I find I'm attracted to the idea of clustering. What if I can find n-clusters of closely related plots to the user input. That would allow for me to achieve speed in results and quality. It would also allow me to tune parameters to get faster results in exchange from quality or vice versa. 
+
+I'm also realizing I should probably explain the maths behind it since I will mostly be using libraries. 
+I will be using k-means clustering as that seems an appropriate decision for the prototype, will revisit this decision when I have to scale. I will also have genres so I have a suspicion I could use number of genres for k.
+I normalize the vectors to unit length by dividing by the Euclidean norm. When normalized, cosine_sim(a,b)=a⋅b. 
+If normalized, this allows for 
+∥a−b∥2=(a−b)⋅(a−b)=∥a∥2+∥b∥2−2(a⋅b)=2−2(a⋅b) meaning vector length wont impact similarity. 
+
+implementing a rough version, I got a prototype that gets the 5 closest books and it works well... NICE!.

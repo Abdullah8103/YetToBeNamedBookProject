@@ -1,0 +1,27 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Airflow
+airflow/
+logs/
+airflow.db
+*.pid
+
+# Environment / secrets
+.env
+*.env
+
+# OS / Editor
+.DS_Store
+*.swp
+
+# Jupyter / data
+.ipynb_checkpoints/
+data/
+*.csv
+*.parquet
+
+# VSCode
+.vscode/

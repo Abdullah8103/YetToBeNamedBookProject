@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Recommender</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fdf5e6; /* Cream background */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+            background-color: #ffe4c4; /* Slightly darker cream */
+        }
+        ul {
+            margin-top: 20px;
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #fff8dc;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Book Recommender</h1>
+    <form method="post">
+        <input type="text" name="plot" placeholder="Enter a plot description" size="50" required>
+        <br>
+        <button type="submit">Recommend Books</button>
+    </form>
+
+    {% if results %}
+    <ul>
+        {% for title in results %}
+        <li>{{ title }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>

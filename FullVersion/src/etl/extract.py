@@ -2,10 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import time
+from datetime import datetime, timedelta
 pd.set_option('display.max_columns', None)   # show all columns
 pd.set_option('display.max_rows', None)      # show all rows
 pd.set_option('display.max_colwidth', None)  # show full text in each cell
-
+import os
+api_key = os.environ.get("NYT_API_KEY")
 def extract():
     print("Extracting data...")
     return []
@@ -91,43 +93,46 @@ def get_nyt_api_key():
 
     return api_key
 
+OUTPUT_DIR = "/mnt/c/Users/abbas/Documents/GitHub/YetToBeNamedBookProject/FullVersion/data/raw"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def extract_nyt_books(list_name='hardcover-fiction', num_books=None):
+def fetch_nyt_bestsellers(list_names, start_date, end_date, delay=0.5):
     """
-    Extract NYT bestseller books with title and plot/description.
+    Fetch historical NYT bestsellers and save weekly batches as CSVs.
 
-    Args:
-        list_name (str): Bestseller list name.
-        num_books (int, optional): Limit number of books to extract.
-
-    Returns:
-        pd.DataFrame: columns ['title', 'plot']
+    :param list_names: list of NYT bestseller list names (e.g., ["hardcover-fiction"])
+    :param start_date: datetime object, start of historical range
+    :param end_date: datetime object, end of historical range
+    :param delay: seconds to wait between requests (for rate limiting)
     """
-    api_key = get_nyt_api_key()
-    url = f"https://api.nytimes.com/svc/books/v3/lists/current/{list_name}.json"
-    params = {"api-key": api_key}
-    response = requests.get(url, params=params)
+    current_date = start_date
+    NYT_API_KEY = get_nyt_api_key()
+    while current_date <= end_date:
+        for list_name in list_names:
+            url = f"https://api.nytimes.com/svc/books/v3/lists/{current_date.strftime('%Y-%m-%d')}/{list_name}.json"
+            params = {"api-key": NYT_API_KEY}
 
-    if response.status_code != 200:
-        raise Exception(f"NYT API request failed: {response.status_code}")
+            try:
+                response = requests.get(url, params=params, timeout=10)
+                data = response.json()
+                books = data.get("results", {}).get("books", [])
 
-    data = response.json()
-    books = []
+                if books:
+                    df = pd.DataFrame([{
+                        "title": book.get("title"),
+                        "description": book.get("description")
+                    } for book in books])
 
-    for entry in data['results']['books']:
-        title = entry['title']
-        plot = entry['description'] if entry['description'] else "No Description"
-        books.append({"title": title, "plot": plot})
+                    # Save weekly batch
+                    filename = f"{OUTPUT_DIR}/{list_name}_{current_date.strftime('%Y-%m-%d')}.csv"
+                    df.to_csv(filename, index=False)
+                    print(f"Saved {len(df)} books for {list_name} on {current_date.strftime('%Y-%m-%d')}")
 
-    if num_books:
-        books = books[:num_books]
+            except Exception as e:
+                print(f"Error fetching {list_name} on {current_date}: {e}")
 
-    df = pd.DataFrame(books)
-    return df
+            time.sleep(delay)  # avoid hitting rate limits
 
+        current_date += timedelta(days=7)  # next week
 
-# Optional test run
-if __name__ == "__main__":
-    df = extract_nyt_books(num_books=10)
-    pd.set_option('display.max_colwidth', None)
-    print(df)
+    print("Finished fetching NYT bestsellers!")

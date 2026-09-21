@@ -25,3 +25,6 @@ data/
 
 # VSCode
 .vscode/
+
+# JetBrains (PyCharm/IntelliJ)
+.idea/

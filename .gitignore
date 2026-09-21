@@ -28,3 +28,5 @@ data/
 
 # JetBrains (PyCharm/IntelliJ)
 .idea/
+
+venv_airflow/

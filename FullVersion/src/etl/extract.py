@@ -93,7 +93,8 @@ def get_nyt_api_key():
 
     return api_key
 
-OUTPUT_DIR = "/mnt/c/Users/abbas/Documents/GitHub/YetToBeNamedBookProject/FullVersion/data/raw"
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def fetch_nyt_bestsellers(list_names, start_date, end_date, delay=0.5):

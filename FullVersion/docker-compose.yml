@@ -1,0 +1,9 @@
+services:
+  book-search:
+    build: .
+    ports:
+      - "8000:8000"
+    # The search app only needs the pre-built faiss_index.bin / docs.pkl
+    # (already included in the image via src/), so no env vars or
+    # external services are required just to run it.
+    restart: unless-stopped

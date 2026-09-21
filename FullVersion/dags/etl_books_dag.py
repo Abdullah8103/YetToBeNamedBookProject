@@ -4,18 +4,24 @@ from datetime import datetime
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import sys, os
+import pandas as pd
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import your extract/load functions
 from src.etl.extract import extract_gutenberg_titles_and_plots, fetch_nyt_bestsellers
 from src.etl.load import load_books_to_mongodb
 
-RAW_DATA_DIR = "/mnt/c/Users/abbas/Documents/GitHub/YetToBeNamedBookProject/FullVersion/data/raw"
+# Relative to this file, not a hardcoded machine-specific path, so it works
+# on any machine/container this DAG runs on.
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
 COMBINED_DATA_FILE = os.path.join(RAW_DATA_DIR, "all_books.csv")
 os.makedirs(RAW_DATA_DIR, exist_ok=True)
 
-# MongoDB connection URI
-MONGO_URI = "mongodb+srv://abbassimuhammadabdullah_db_user:Easy8103@yettobenamedbookproject.bvjbjom.mongodb.net/?appName=YetToBeNamedBookProject"
+# MongoDB connection URI -- set MONGO_URI in the environment (or as an
+# Airflow Connection/Variable) before this DAG is parsed. Never hardcode
+# credentials in DAG source.
+MONGO_URI = os.environ["MONGO_URI"]
 
 # Create Mongo client once
 client = MongoClient(MONGO_URI, server_api=ServerApi("1"))
@@ -65,14 +71,13 @@ def combine_books_task():
     print(f"Combined {len(df_all)} books into {COMBINED_DATA_FILE}")
 
 def transform_books_task(**kwargs):
-    import pandas as pd
     from src.etl.transform import transform_books
 
     df = pd.read_csv(COMBINED_DATA_FILE)
     df = transform_books(df)
     df.to_csv(os.path.join(RAW_DATA_DIR, "all_books_clean.csv"), index=False)
+
 def load_to_mongo_task(**kwargs):
-    import pandas as pd
     df = pd.read_csv(os.path.join(RAW_DATA_DIR, "all_books_clean.csv"))
     load_books_to_mongodb(df, client=client, db_name="books_db", collection_name="all_books")
 
